@@ -24,8 +24,6 @@ cmake = "0.1.38"
 azul-css                = { version = "0.1.0",                path = "../azul-css"                              }
 azul-native-style       = { version = "0.1.0",                path = "../azul-native-style",    optional = true }
 azul-css-parser         = { version = "0.1.0",                path = "../azul-css-parser",      optional = true }
-# azul-dependencies       = { version = "0.1.0",                git = "https://github.com/maps4print/azul-dependencies", rev = "380b7e7cba8b728a3fc89fe28952e3b07aa624e7" }
-
 glium                   = { version = "0.24.0", default-features = false, features = ["glutin"] }
 euclid                  = { version = "0.19.4", default-features = false }
 rusttype                = { version = "0.7.3", default-features = false }
@@ -48,6 +46,7 @@ image                   = { version = "0.20.1", default-features = false, option
 gleam                   = { version = "0.6" }
 serde_derive            = { version = "1", optional = true }
 twox-hash               = { version = "1.3.0"}
+harfbuzz                = { version = "0.3.0"}
 
 # Linux: Use webrender with freetype feature enabled
 [target.'cfg(target_os = "linux")'.dependencies]
