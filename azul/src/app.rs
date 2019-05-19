@@ -1459,47 +1459,32 @@ fn draw_texture_to_screen(context: &Gl, texture: GLuint, framebuffer_size: Devic
     context.bind_texture(gl::TEXTURE_2D, 0);
 }
 
+use webrender::DebugFlags;
+fn set_flag(flags: DebugFlags, flag: DebugFlags, state: bool) -> DebugFlags {
+    if state {
+        return flags | flag;
+    } else {
+        return flags & !flag;
+    }
+}
+
 fn set_webrender_debug_flags(r: &mut Renderer, old_flags: &DebugState, new_flags: &DebugState) {
+    if old_flags != new_flags {
+        let mut flags = r.get_debug_flags();
+        flags = set_flag(flags, DebugFlags::PROFILER_DBG, new_flags.profiler_dbg);
+        flags = set_flag(flags, DebugFlags::RENDER_TARGET_DBG, new_flags.render_target_dbg);
+        flags = set_flag(flags, DebugFlags::TEXTURE_CACHE_DBG, new_flags.texture_cache_dbg);
+        flags = set_flag(flags, DebugFlags::GPU_TIME_QUERIES, new_flags.gpu_time_queries);
+        flags = set_flag(flags, DebugFlags::GPU_SAMPLE_QUERIES, new_flags.gpu_sample_queries);
+        flags = set_flag(flags, DebugFlags::DISABLE_BATCHING, new_flags.disable_batching);
+        flags = set_flag(flags, DebugFlags::EPOCHS, new_flags.epochs);
+        flags = set_flag(flags, DebugFlags::COMPACT_PROFILER, new_flags.compact_profiler);
+        flags = set_flag(flags, DebugFlags::ECHO_DRIVER_MESSAGES, new_flags.echo_driver_messages);
+        flags = set_flag(flags, DebugFlags::NEW_FRAME_INDICATOR, new_flags.new_frame_indicator);
+        flags = set_flag(flags, DebugFlags::NEW_SCENE_INDICATOR, new_flags.new_scene_indicator);
+        flags = set_flag(flags, DebugFlags::SHOW_OVERDRAW, new_flags.show_overdraw);
+        flags = set_flag(flags, DebugFlags::GPU_CACHE_DBG, new_flags.gpu_cache_dbg);
 
-    use webrender::DebugFlags;
-
-    if old_flags.profiler_dbg != new_flags.profiler_dbg {
-        r.set_debug_flag(DebugFlags::PROFILER_DBG, new_flags.profiler_dbg);
-    }
-    if old_flags.render_target_dbg != new_flags.render_target_dbg {
-        r.set_debug_flag(DebugFlags::RENDER_TARGET_DBG, new_flags.render_target_dbg);
-    }
-    if old_flags.texture_cache_dbg != new_flags.texture_cache_dbg {
-        r.set_debug_flag(DebugFlags::TEXTURE_CACHE_DBG, new_flags.texture_cache_dbg);
-    }
-    if old_flags.gpu_time_queries != new_flags.gpu_time_queries {
-        r.set_debug_flag(DebugFlags::GPU_TIME_QUERIES, new_flags.gpu_time_queries);
-    }
-    if old_flags.gpu_sample_queries != new_flags.gpu_sample_queries {
-        r.set_debug_flag(DebugFlags::GPU_SAMPLE_QUERIES, new_flags.gpu_sample_queries);
-    }
-    if old_flags.disable_batching != new_flags.disable_batching {
-        r.set_debug_flag(DebugFlags::DISABLE_BATCHING, new_flags.disable_batching);
-    }
-    if old_flags.epochs != new_flags.epochs {
-        r.set_debug_flag(DebugFlags::EPOCHS, new_flags.epochs);
-    }
-    if old_flags.compact_profiler != new_flags.compact_profiler {
-        r.set_debug_flag(DebugFlags::COMPACT_PROFILER, new_flags.compact_profiler);
-    }
-    if old_flags.echo_driver_messages != new_flags.echo_driver_messages {
-        r.set_debug_flag(DebugFlags::ECHO_DRIVER_MESSAGES, new_flags.echo_driver_messages);
-    }
-    if old_flags.new_frame_indicator != new_flags.new_frame_indicator {
-        r.set_debug_flag(DebugFlags::NEW_FRAME_INDICATOR, new_flags.new_frame_indicator);
-    }
-    if old_flags.new_scene_indicator != new_flags.new_scene_indicator {
-        r.set_debug_flag(DebugFlags::NEW_SCENE_INDICATOR, new_flags.new_scene_indicator);
-    }
-    if old_flags.show_overdraw != new_flags.show_overdraw {
-        r.set_debug_flag(DebugFlags::SHOW_OVERDRAW, new_flags.show_overdraw);
-    }
-    if old_flags.gpu_cache_dbg != new_flags.gpu_cache_dbg {
-        r.set_debug_flag(DebugFlags::GPU_CACHE_DBG, new_flags.gpu_cache_dbg);
+        r.set_debug_flags(flags);
     }
 }

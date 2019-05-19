@@ -134,9 +134,14 @@
 #![deny(missing_copy_implementations)]
 #![deny(clippy::all)]
 
-#[macro_use(warn, error, lazy_static)]
+#[cfg(feature = "logging")]
+#[macro_use(warn, error)]
+pub extern crate log;
+#[macro_use(lazy_static)]
+pub extern crate lazy_static;
 #[cfg_attr(feature = "svg", macro_use(implement_vertex, uniform))]
-pub extern crate azul_dependencies;
+pub extern crate glium;
+
 #[cfg(feature = "serde_serialization")]
 #[cfg_attr(feature = "serde_serialization", macro_use)]
 extern crate serde;
@@ -144,34 +149,31 @@ extern crate serde;
 #[cfg_attr(feature = "serde_serialization", macro_use)]
 extern crate serde_derive;
 
-pub(crate) use azul_dependencies::glium as glium;
-pub(crate) use azul_dependencies::gleam as gleam;
-pub(crate) use azul_dependencies::euclid;
-pub(crate) use azul_dependencies::webrender;
-pub(crate) use azul_dependencies::app_units;
-pub(crate) use azul_dependencies::unicode_normalization;
-pub(crate) use azul_dependencies::tinyfiledialogs;
-pub(crate) use azul_dependencies::clipboard2;
-pub(crate) use azul_dependencies::font_loader;
-pub(crate) use azul_dependencies::xmlparser;
-pub(crate) use azul_dependencies::harfbuzz_sys;
+pub extern crate gleam;
+pub extern crate euclid;
+pub extern crate webrender;
+pub extern crate app_units;
+pub extern crate unicode_normalization;
+pub extern crate tinyfiledialogs;
+pub extern crate clipboard2;
+pub extern crate font_loader;
+pub extern crate xmlparser;
+pub extern crate harfbuzz_sys;
 
-#[cfg(feature = "logging")]
-pub(crate) use azul_dependencies::log;
 #[cfg(feature = "svg")]
-pub(crate) use azul_dependencies::stb_truetype;
+pub extern crate stb_truetype;
 #[cfg(feature = "logging")]
-pub(crate) use azul_dependencies::fern;
+pub extern crate fern;
 #[cfg(feature = "logging")]
-pub(crate) use azul_dependencies::backtrace;
+pub extern crate backtrace;
 #[cfg(feature = "image_loading")]
-pub(crate) use azul_dependencies::image;
+pub extern crate image;
 #[cfg(feature = "svg")]
-pub(crate) use azul_dependencies::lyon;
+pub extern crate lyon;
 #[cfg(feature = "svg_parsing")]
-pub(crate) use azul_dependencies::usvg;
+pub extern crate usvg;
 #[cfg(feature = "faster-hashing")]
-pub(crate) use azul_dependencies::twox_hash;
+pub extern crate twox_hash;
 
 #[cfg(feature = "css_parser")]
 extern crate azul_css;

@@ -1,4 +1,4 @@
-[package]
+﻿[package]
 name = "azul"
 version = "0.1.0"
 authors = ["Felix Schütt <felix.schuett@maps4print.com>"]
@@ -17,13 +17,47 @@ readme = "../README.md"
 exclude = ["../assets/*", "../doc/*", "../examples/*"]
 autoexamples = false
 
+[build-dependencies]
+cmake = "0.1.38"
+
 [dependencies]
 azul-css                = { version = "0.1.0",                path = "../azul-css"                              }
 azul-native-style       = { version = "0.1.0",                path = "../azul-native-style",    optional = true }
 azul-css-parser         = { version = "0.1.0",                path = "../azul-css-parser",      optional = true }
-azul-dependencies       = { version = "0.1.0",                git = "https://github.com/maps4print/azul-dependencies", rev = "380b7e7cba8b728a3fc89fe28952e3b07aa624e7" }
-serde_derive            = { version = "1",                    optional = true }
-serde                   = { version = "1",                    optional = true }
+# azul-dependencies       = { version = "0.1.0",                git = "https://github.com/maps4print/azul-dependencies", rev = "380b7e7cba8b728a3fc89fe28952e3b07aa624e7" }
+
+glium                   = { version = "0.24.0", default-features = false, features = ["glutin"] }
+euclid                  = { version = "0.19.4", default-features = false }
+rusttype                = { version = "0.7.3", default-features = false }
+app_units               = { version = "0.7.1", default-features = false }
+unicode-normalization   = { version = "0.1.7", default-features = false }
+lazy_static             = { version = "1.2.0", default-features = false }
+tinyfiledialogs         = { version = "3.3.5", default-features = false }
+clipboard2              = { version = "0.1.1", default-features = false }
+font-loader             = { version = "0.8.0", default-features = false }
+xmlparser               = { version = "0.6.1", default-features = false }
+harfbuzz-sys            = { version = "0.3.0", default-features = false }
+serde                   = { version = "1.0.80", default-features = false, optional = true }
+log                     = { version = "0.4.6", default-features = false, optional = true }
+stb_truetype            = { version = "0.2.2", default-features = false, optional = true }
+fern                    = { version = "0.5.7", default-features = false, optional = true }
+backtrace               = { version = "0.3.12", default-features = false, optional = true, features = ["std", "libunwind", "libbacktrace", "coresymbolication", "dladdr", "dbghelp"] }
+lyon                    = { version = "0.11.0", default-features = false, optional = true }
+usvg                    = { version = "0.3.0",  default-features = false, optional = true }
+image                   = { version = "0.20.1", default-features = false, optional = true, features = ["gif_codec", "jpeg", "png_codec", "pnm", "tiff", "bmp"] }
+gleam                   = { version = "0.6" }
+serde_derive            = { version = "1", optional = true }
+twox-hash               = { version = "1.3.0"}
+
+# Linux: Use webrender with freetype feature enabled
+[target.'cfg(target_os = "linux")'.dependencies]
+webrender = { version = "0.58" }
+
+# Windows: Use nativefiledialog because of better Unicode support for file browsers
+# TODO: Unicode problems have been fixed upstream, update azul to tinyfiledialogs!
+[target.'cfg(not(target_os = "linux"))'.dependencies]
+# nfd = { version = "0.0.4", path = "./nfd-0.0.4", default-features = false }
+webrender = { version = "0.58", default-features = false }
 
 [features]
 # The "SVG" feature only enables the creation of shapes / polygons, etc. not the actual parsing
@@ -36,33 +70,33 @@ default = [
 # Enable this feature to enable crash logging & reporting.
 # Azul will insert custom panic handlers to pop up a message and log
 # crashes to an "error.log" file, see AppConfig for more details
-logging = ["azul-dependencies/logging"]
+logging = ["fern", "backtrace", "log"]
 # The SVG rendering module is pretty huge since it needs lyon - if you don't use
 # SVG rendering in your app, you can turn this off to increase compilation
 # speed and decrease your binary size
-svg = ["azul-dependencies/svg"]
+svg = ["lyon", "stb_truetype"]
 # This is for activating **parsing** of SVG files. If you, for example, just
 # want to draw shapes on the screen, you do not need to activate this feature,
 # this is just for parsing the SVG from a file.
-svg_parsing = ["azul-dependencies/svg_parsing", "svg"]
+svg_parsing = ["svg", "usvg"]
 # If you want an application icon, you can either load it via the raw
 # RGBA bytes or use the icon_loading feature to decode it from a PNG / JPG /
 # whatever image format on startup. Note that this will import the image
 # dependency and use a bit of extra runtime.
-icon_loading = ["azul-dependencies/icon_loading"]
+icon_loading = ["glium/icon_loading"]
 # For serializing / deserializing CSS colors using serde
-serde_serialization = ["azul-dependencies/serde_serialization", "serde_derive", "serde"]
+serde_serialization = ["serde_derive", "serde"]
 serde_serialization_css = ["css_parser", "azul-css-parser/serde_serialization", "serde_serialization"]
 # On some applications you might not want to load any images. For these purposes
 # the image crate can be disabled, to speed up compile times
-image_loading = ["azul-dependencies/image_loading"]
+image_loading = ["image"]
 # Features to load extra image formats
-ico = ["azul-dependencies/ico"]
-tga = ["azul-dependencies/tga"]
-hdr = ["azul-dependencies/hdr"]
-jpeg_rayon = ["azul-dependencies/jpeg_rayon"]
-dxt = ["azul-dependencies/dxt"]
-webp = ["azul-dependencies/webp"]
+ico = ["image/ico"]
+tga = ["image/tga"]
+hdr = ["image/hdr"]
+jpeg_rayon = ["image/jpeg_rayon"]
+dxt = ["image/dxt"]
+webp = ["image/webp"]
 css_parser = ["azul-css-parser"]
 native_style = ["azul-native-style"]
 

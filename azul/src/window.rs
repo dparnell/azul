@@ -17,7 +17,7 @@ use glium::{
     IncompatibleOpenGl, Display, SwapBuffersError,
     debug::DebugCallbackBehavior,
     glutin::{
-        self, EventsLoop, AvailableMonitorsIter, ContextTrait, CombinedContext, CreationError,
+        self, EventsLoop, AvailableMonitorsIter, ContextTrait, CreationError,
         MonitorId, ContextError, ContextBuilder, WindowId as GliumWindowId,
         Window as GliumWindow, WindowBuilder as GliumWindowBuilder, Icon, Context,
         dpi::LogicalSize,
@@ -533,34 +533,34 @@ impl<'a, T> Window<T> {
         }
 
         // Only create a context with VSync and SRGB if the context creation works
-        let gl_window = create_gl_window(window, &events_loop, Some(shared_context))?;
+        let display = create_display(window, &events_loop, Some(shared_context))?;
 
         // Hide the window until the first draw (prevents flash on startup)
-        gl_window.hide();
+        display.gl_window().hide();
 
-        let (hidpi_factor, winit_hidpi_factor) = get_hidpi_factor(&gl_window.window(), &events_loop);
+        let (hidpi_factor, winit_hidpi_factor) = get_hidpi_factor(&display.gl_window().window(), &events_loop);
         let mut state = options.state.clone();
         state.size.hidpi_factor = hidpi_factor as f64;
         state.size.winit_hidpi_factor = winit_hidpi_factor as f64;
 
         if options.state.is_fullscreen {
-            gl_window.window().set_fullscreen(Some(gl_window.window().get_current_monitor()));
+            display.gl_window().window().set_fullscreen(Some(display.gl_window().window().get_current_monitor()));
         }
 
         if let Some(pos) = options.state.position {
-            gl_window.window().set_position(pos);
+            display.gl_window().window().set_position(pos);
         }
 
         if options.state.is_maximized && !options.state.is_fullscreen {
-            gl_window.window().set_maximized(true);
+            display.gl_window().window().set_maximized(true);
         } else if !options.state.is_fullscreen {
-            gl_window.window().set_inner_size(options.state.size.get_inner_logical_size());
+            display.gl_window().window().set_inner_size(options.state.size.get_inner_logical_size());
         }
 
         // #[cfg(debug_assertions)]
         // let display = Display::with_debug(gl_window, DebugCallbackBehavior::DebugMessageOnError)?;
         // #[cfg(not(debug_assertions))]
-        let display = Display::with_debug(gl_window, DebugCallbackBehavior::Ignore)?;
+        // let display = Display::with_debug(gl_window, DebugCallbackBehavior::Ignore)?;
 
         let framebuffer_size = {
             let inner_logical_size = display.gl_window().get_inner_size().unwrap();
@@ -761,11 +761,10 @@ impl FakeDisplay {
     {
         let events_loop = EventsLoop::new();
         let window = GliumWindowBuilder::new().with_dimensions(LogicalSize::new(10.0, 10.0)).with_visibility(false);
-        let gl_window = create_gl_window(window, &events_loop, None)?;
-        let (dpi_factor, _) = get_hidpi_factor(&gl_window.window(), &events_loop);
-        gl_window.hide();
+        let display = create_display(window, &events_loop, None)?;
+        let (dpi_factor, _) = get_hidpi_factor(&display.gl_window().window(), &events_loop);
+        display.gl_window().hide();
 
-        let display = Display::with_debug(gl_window, DebugCallbackBehavior::Ignore)?;
         let gl = get_gl_context(&display)?;
 
         // Note: Notifier is fairly useless, since rendering is completely single-threaded, see comments on RenderNotifier impl
@@ -833,8 +832,8 @@ fn get_hidpi_factor(window: &GliumWindow, events_loop: &EventsLoop) -> (f64, f64
 }
 
 
-fn create_gl_window(window: GliumWindowBuilder, events_loop: &EventsLoop, shared_context: Option<&Context>)
--> Result<CombinedContext, WindowCreateError>
+fn create_display(window: GliumWindowBuilder, events_loop: &EventsLoop, shared_context: Option<&Context>)
+-> Result<Display, WindowCreateError>
 {
     // The shared_context is reversed: If the shared_context is None, then this window is the root window,
     // so the window should be created with new_shared (so the context can be shared to all other windows).
@@ -842,11 +841,11 @@ fn create_gl_window(window: GliumWindowBuilder, events_loop: &EventsLoop, shared
     // If the shared_context is Some() then the window is not a root window, so it should share the existing
     // context, but not re-share it (so, create it normally via ::new() instead of ::new_shared()).
 
-    CombinedContext::new(window.clone(), create_context_builder(true, true, shared_context),  &events_loop).or_else(|_|
-    CombinedContext::new(window.clone(), create_context_builder(true, false, shared_context), &events_loop)).or_else(|_|
-    CombinedContext::new(window.clone(), create_context_builder(false, true, shared_context), &events_loop)).or_else(|_|
-    CombinedContext::new(window.clone(), create_context_builder(false, false,shared_context), &events_loop))
-    .map_err(|e| WindowCreateError::CreateError(e))
+    Display::new(window.clone(), create_context_builder(true, true, shared_context),  &events_loop).or_else(|_|
+    Display::new(window.clone(), create_context_builder(true, false, shared_context), &events_loop)).or_else(|_|
+    Display::new(window.clone(), create_context_builder(false, true, shared_context), &events_loop)).or_else(|_|
+    Display::new(window.clone(), create_context_builder(false, false,shared_context), &events_loop))
+    .map_err(|e| WindowCreateError::DisplayCreateError(e))
 }
 
 /// ContextBuilder is sadly not clone-able, which is why it has to be re-created
