@@ -1154,7 +1154,7 @@ fn populate_css_properties(
 
     rect.styled_node.css_constraints.values()
     .filter_map(|constraint| match constraint {
-        Static(static_property) => { apply_style_property(rect, static_property); None },
+        Static(static_property) => { apply_style_property(rect, &static_property); None },
         Dynamic(dynamic_property) => Some(dynamic_property),
     })
     .filter_map(|dynamic_property| {
@@ -1182,6 +1182,8 @@ fn apply_style_property(rect: &mut DisplayRectangle, property: &CssProperty) {
     let layout = &mut rect.layout;
 
     match property {
+        Display(_)                      => (),
+        Float(_)                        => (),
 
         TextColor(c)                    => style.text_color = Some(*c),
         FontSize(fs)                    => style.font_size = Some(*fs),

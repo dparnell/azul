@@ -625,7 +625,7 @@ pub fn get_layouted_glyphs(
 
 pub fn word_positions_to_inline_text_layout(word_positions: &WordPositions) -> InlineTextLayout {
 
-    // let mut lines = Vec::new();
+    let mut lines = Vec::new();
 
     // TODO: calculate text lines of the word positions!
 
